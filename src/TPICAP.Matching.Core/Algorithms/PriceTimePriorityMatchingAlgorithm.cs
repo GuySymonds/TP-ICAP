@@ -8,6 +8,49 @@ public sealed class PriceTimePriorityMatchingAlgorithm : IMatchingAlgorithm
 {
     public IReadOnlyList<MatchedOrder> Match(IReadOnlyList<Order> orders)
     {
+        var remainingVolumes = orders.ToDictionary(order => order.OrderId, order => order.Volume, StringComparer.Ordinal);
+        var matches = orders.ToDictionary(order => order.OrderId, _ => new List<MatchEntry>(), StringComparer.Ordinal);
+        var buyOrders = orders
+            .Where(order => order.Direction == OrderDirection.Buy)
+            .OrderByDescending(order => order.Notional)
+            .ThenBy(order => order.Timestamp)
+            .ToArray();
+
+        foreach (var sellOrder in orders.Where(order => order.Direction == OrderDirection.Sell))
+        {
+            var remainingSellVolume = remainingVolumes[sellOrder.OrderId];
+
+            foreach (var buyOrder in buyOrders)
+            {
+                if (remainingSellVolume == 0)
+                {
+                    break;
+                }
+
+                if (buyOrder.Price != sellOrder.Price)
+                {
+                    continue;
+                }
+
+                var remainingBuyVolume = remainingVolumes[buyOrder.OrderId];
+                if (remainingBuyVolume == 0)
+                {
+                    continue;
+                }
+
+                var matchedVolume = Math.Min(remainingBuyVolume, remainingSellVolume);
+                var matchedNotional = matchedVolume * sellOrder.Price;
+
+                matches[buyOrder.OrderId].Add(new MatchEntry(sellOrder.OrderId, matchedNotional, matchedVolume));
+                matches[sellOrder.OrderId].Add(new MatchEntry(buyOrder.OrderId, matchedNotional, matchedVolume));
+
+                remainingVolumes[buyOrder.OrderId] = remainingBuyVolume - matchedVolume;
+                remainingSellVolume -= matchedVolume;
+            }
+
+            remainingVolumes[sellOrder.OrderId] = remainingSellVolume;
+        }
+
         return orders
             .Select(order => new MatchedOrder(
                 string.Empty,
@@ -15,8 +58,22 @@ public sealed class PriceTimePriorityMatchingAlgorithm : IMatchingAlgorithm
                 order.Direction,
                 order.Volume,
                 order.Notional,
-                MatchState.NoMatch,
-                []))
+                GetMatchState(order.Volume, matches[order.OrderId]),
+                matches[order.OrderId]))
             .ToArray();
+    }
+
+    private static MatchState GetMatchState(int originalVolume, IReadOnlyList<MatchEntry> matches)
+    {
+        var matchedVolume = matches.Sum(match => match.Volume);
+
+        if (matchedVolume == 0)
+        {
+            return MatchState.NoMatch;
+        }
+
+        return matchedVolume == originalVolume
+            ? MatchState.FullMatch
+            : MatchState.PartialMatch;
     }
 }
