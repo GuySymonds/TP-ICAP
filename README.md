@@ -1,5 +1,7 @@
 # TP ICAP Matching Challenge
 
+![Coverage](https://raw.githubusercontent.com/GuySymonds/TP-ICAP/main/coveragereport/badge_linecoverage.svg)
+
 ## Intent
 
 This repository contains a small, production-minded C# solution for the TP ICAP back-end technical challenge.
@@ -56,6 +58,14 @@ Work starts from the acceptance tests based on the two explicit challenge scenar
 ```bash
 dotnet test
 ```
+
+### Run tests with code coverage
+
+```bash
+dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
+```
+
+Coverage files are written under `tests/TPICAP.Matching.Core.Tests/TestResults/`.
 
 ### Run the console demo
 
