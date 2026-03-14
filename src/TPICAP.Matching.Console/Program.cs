@@ -17,20 +17,20 @@ internal static class Program
                 new PriceTimePriorityMatchingAlgorithm(),
                 new []
                 {
-                    new Order("A1", OrderDirection.Buy, 100, 4.99m, new TimeOnly(9, 27, 43)),
-                    new Order("B1", OrderDirection.Buy, 200, 5.00m, new TimeOnly(10, 21, 46)),
-                    new Order("C1", OrderDirection.Buy, 150, 5.00m, new TimeOnly(10, 26, 18)),
-                    new Order("D1", OrderDirection.Sell, 150, 5.00m, new TimeOnly(10, 32, 41)),
-                    new Order("E1", OrderDirection.Sell, 100, 5.00m, new TimeOnly(10, 33, 7))
+                    new Order("A", "A1", OrderDirection.Buy, 100, 4.99m, new TimeOnly(9, 27, 43)),
+                    new Order("B", "B1", OrderDirection.Buy, 200, 5.00m, new TimeOnly(10, 21, 46)),
+                    new Order("C", "C1", OrderDirection.Buy, 150, 5.00m, new TimeOnly(10, 26, 18)),
+                    new Order("D", "D1", OrderDirection.Sell, 150, 5.00m, new TimeOnly(10, 32, 41)),
+                    new Order("E", "E1", OrderDirection.Sell, 100, 5.00m, new TimeOnly(10, 33, 7))
                 }),
             new DemoScenario(
                 "Pro-Rata",
                 new ProRataMatchingAlgorithm(),
                 new []
                 {
-                    new Order("A1", OrderDirection.Buy, 50, 5.00m, new TimeOnly(9, 27, 43)),
-                    new Order("B1", OrderDirection.Buy, 200, 5.00m, new TimeOnly(10, 21, 46)),
-                    new Order("C1", OrderDirection.Sell, 200, 5.00m, new TimeOnly(10, 26, 18))
+                    new Order("A", "A1", OrderDirection.Buy, 50, 5.00m, new TimeOnly(9, 27, 43)),
+                    new Order("B", "B1", OrderDirection.Buy, 200, 5.00m, new TimeOnly(10, 21, 46)),
+                    new Order("C", "C1", OrderDirection.Sell, 200, 5.00m, new TimeOnly(10, 26, 18))
                 })
         };
 
@@ -61,6 +61,7 @@ internal static class Program
         var table = new Table()
             .RoundedBorder()
             .Title("[white]Input Orders[/]")
+            .AddColumn("CompanyId")
             .AddColumn("OrderId")
             .AddColumn("Direction")
             .AddColumn("Volume")
@@ -71,6 +72,7 @@ internal static class Program
         foreach (var order in orders)
         {
             table.AddRow(
+                Escape(order.CompanyId),
                 Escape(order.OrderId),
                 order.Direction.ToString(),
                 order.Volume.ToString(),
@@ -87,6 +89,7 @@ internal static class Program
         var table = new Table()
             .RoundedBorder()
             .Title("[white]Resulting Order Book[/]")
+            .AddColumn("CompanyId")
             .AddColumn("OrderId")
             .AddColumn("Direction")
             .AddColumn("Volume")
@@ -97,6 +100,7 @@ internal static class Program
         foreach (var order in orderBook)
         {
             table.AddRow(
+                Escape(order.CompanyId),
                 Escape(order.OrderId),
                 order.Direction.ToString(),
                 order.Volume.ToString(),

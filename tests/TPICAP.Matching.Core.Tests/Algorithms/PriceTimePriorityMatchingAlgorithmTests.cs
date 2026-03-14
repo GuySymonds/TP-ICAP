@@ -15,9 +15,9 @@ public class PriceTimePriorityMatchingAlgorithmTests
         var algorithm = new PriceTimePriorityMatchingAlgorithm();
         var orders = new[]
         {
-            new Order("A1", OrderDirection.Buy, 100, 5.00m, new TimeOnly(9, 0, 0)),
-            new Order("B1", OrderDirection.Buy, 100, 5.00m, new TimeOnly(10, 0, 0)),
-            new Order("S1", OrderDirection.Sell, 100, 5.00m, new TimeOnly(11, 0, 0))
+            new Order("A", "A1", OrderDirection.Buy, 100, 5.00m, new TimeOnly(9, 0, 0)),
+            new Order("B", "B1", OrderDirection.Buy, 100, 5.00m, new TimeOnly(10, 0, 0)),
+            new Order("S", "S1", OrderDirection.Sell, 100, 5.00m, new TimeOnly(11, 0, 0))
         };
 
         // Act
@@ -53,8 +53,8 @@ public class PriceTimePriorityMatchingAlgorithmTests
         var algorithm = new PriceTimePriorityMatchingAlgorithm();
         var orders = new[]
         {
-            new Order("A1", OrderDirection.Buy, 100, 4.99m, new TimeOnly(9, 0, 0)),
-            new Order("S1", OrderDirection.Sell, 100, 5.00m, new TimeOnly(10, 0, 0))
+            new Order("A", "A1", OrderDirection.Buy, 100, 4.99m, new TimeOnly(9, 0, 0)),
+            new Order("S", "S1", OrderDirection.Sell, 100, 5.00m, new TimeOnly(10, 0, 0))
         };
 
         // Act

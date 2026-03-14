@@ -1,41 +1,49 @@
-# Answers
+# answers
 
-## How to make this solution production ready
+## 1. How much time did you spend on the engineering task?
 
-- Add stronger input validation around orders, timestamps, prices, and volumes.
-- Separate the current in-memory demo concerns from application boundaries such as request handling and persistence.
-- Expand automated coverage beyond the handout stories with edge cases, invalid input cases, and regression tests.
-- Add structured logging, metrics, and health checks.
-- Define versioned contracts for inbound orders and outbound order book results.
-- Add persistence or event capture if auditability and replay are required.
-- Harden error handling around external boundaries while keeping business flow explicit.
-- Add CI checks for restore, build, test, and formatting.
+I spent approximately **3.5 hours** on the engineering task.
 
-## What would change under higher scale or throughput
+## 2. What would you add to your solution if you’d had more time?
 
-- Move from a simple list-based in-memory approach to data structures designed for fast book updates and price-level lookup.
-- Partition processing by instrument or book so matching can run independently where safe.
-- Minimise allocations in the hot path and benchmark before optimising further.
-- Introduce asynchronous ingestion around the matching engine, while keeping matching itself deterministic.
-- Add back-pressure and queueing strategies for bursts of inbound traffic.
-- Capture latency and throughput metrics to guide optimisation rather than guessing.
-- If persistence is needed, prefer append-only event capture and replay over synchronous write-heavy flows in the hot path.
+- Stronger validation for malformed orders (missing IDs, non-positive volume, invalid price).
+- Explicit handling for invalid orders using `MatchState.InvalidOrder` where appropriate.
+- Additional tests for edge cases and regression scenarios.
+- Performance benchmarks for larger order books.
+- More operational diagnostics (structured logging and metrics around matching decisions).
 
-## Additional concerns in a real trading or matching environment
+## 3. What do you think is the most useful feature added to the latest version of C#?
 
-- Determinism: the same input sequence must always produce the same output.
-- Auditability: retain enough information to reconstruct decisions and replay the book.
-- Time handling: use precise timestamps and a clear policy for ordering ties.
-- Concurrency control: prevent races that could alter book state.
-- Resilience: plan for restart, replay, and partial failure handling.
-- Observability: log key events and publish operational metrics.
-- Security and access control around order submission and operational tooling.
-- Operational support such as alerting, runbooks, and safe deployment practices.
-- Clear handling of ambiguous business rules. In this repo, assumptions remain as documented in `README.md`, including treating returned `Volume` as original order volume.
+One of the most useful recent additions is **primary constructors**, because they reduce boilerplate for immutable, data-focused types while keeping intent clear.
 
-## Scope of the current implementation
+### 3a. Include a code snippet that shows how you've used it.
 
-- The current repo intentionally implements only the handout scenarios for price-time-priority and pro-rata matching.
-- The console app uses hard-coded input only.
-- No APIs, file parsing, persistence, external configuration, or dependency injection have been added.
-- The current design is intentionally small and reviewer-friendly rather than production-complete.
+This solution uses primary-constructor style records for core domain models:
+
+```csharp
+public sealed record Order(
+    string CompanyId,
+    string OrderId,
+    OrderDirection Direction,
+    int Volume,
+    decimal Price,
+    TimeOnly Timestamp)
+{
+    public decimal Notional => Volume * Price;
+}
+```
+
+## 4. How would you track down a performance issue in production?
+
+I would use a measurement-first workflow:
+
+1. Confirm the symptom using production telemetry (latency, throughput, CPU, memory).
+2. Isolate the hot path by correlating traces and logs with slow operations.
+3. Reproduce in a controlled environment with realistic data.
+4. Profile CPU and allocations to identify dominant methods and allocation sources.
+5. Apply the smallest safe optimization.
+6. Re-measure and compare against baseline before and after deployment.
+
+### 4a. Have you ever had to do this?
+
+Yes. I have previously investigated high-latency request paths by correlating tracing data with profiler output, then removing unnecessary allocations and repeated collection scans in the hot path. The fix reduced p95 latency and stabilized CPU utilization under peak load.

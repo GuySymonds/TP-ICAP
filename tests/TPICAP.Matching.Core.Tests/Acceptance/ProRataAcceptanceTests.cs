@@ -15,9 +15,9 @@ public class ProRataAcceptanceTests
         var algorithm = new ProRataMatchingAlgorithm();
         var orders = new[]
         {
-            new Order("A1", OrderDirection.Buy, 50, 5.00m, new TimeOnly(9, 27, 43)),
-            new Order("B1", OrderDirection.Buy, 200, 5.00m, new TimeOnly(10, 21, 46)),
-            new Order("C1", OrderDirection.Sell, 200, 5.00m, new TimeOnly(10, 26, 18))
+            new Order("A", "A1", OrderDirection.Buy, 50, 5.00m, new TimeOnly(9, 27, 43)),
+            new Order("B", "B1", OrderDirection.Buy, 200, 5.00m, new TimeOnly(10, 21, 46)),
+            new Order("C", "C1", OrderDirection.Sell, 200, 5.00m, new TimeOnly(10, 26, 18))
         };
 
         // Act
@@ -27,6 +27,7 @@ public class ProRataAcceptanceTests
         orderBook.Should().HaveCount(3);
 
         var a1 = orderBook[0];
+        a1.CompanyId.Should().Be("A");
         a1.OrderId.Should().Be("A1");
         a1.Direction.Should().Be(OrderDirection.Buy);
         a1.Volume.Should().Be(50);
@@ -38,6 +39,7 @@ public class ProRataAcceptanceTests
         a1.Matches[0].Notional.Should().Be(200.00m);
 
         var b1 = orderBook[1];
+        b1.CompanyId.Should().Be("B");
         b1.OrderId.Should().Be("B1");
         b1.Direction.Should().Be(OrderDirection.Buy);
         b1.Volume.Should().Be(200);
@@ -49,6 +51,7 @@ public class ProRataAcceptanceTests
         b1.Matches[0].Notional.Should().Be(800.00m);
 
         var c1 = orderBook[2];
+        c1.CompanyId.Should().Be("C");
         c1.OrderId.Should().Be("C1");
         c1.Direction.Should().Be(OrderDirection.Sell);
         c1.Volume.Should().Be(200);

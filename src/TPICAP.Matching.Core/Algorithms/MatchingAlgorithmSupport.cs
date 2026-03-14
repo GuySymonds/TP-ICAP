@@ -25,7 +25,7 @@ internal static class MatchingAlgorithmSupport
     {
         return orders
             .Select(order => new MatchedOrder(
-                string.Empty,
+                order.CompanyId,
                 order.OrderId,
                 order.Direction,
                 order.Volume,
