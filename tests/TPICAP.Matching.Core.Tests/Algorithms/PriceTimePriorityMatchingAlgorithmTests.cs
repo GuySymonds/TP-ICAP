@@ -45,4 +45,32 @@ public class PriceTimePriorityMatchingAlgorithmTests
         s1.Matches[0].OrderId.Should().Be("A1");
         s1.Matches[0].Volume.Should().Be(100);
     }
+
+    [Fact]
+    public void Match_WhenBuyAndSellHaveDifferentNotional_DoesNotMatch()
+    {
+        // Arrange
+        var algorithm = new PriceTimePriorityMatchingAlgorithm();
+        var orders = new[]
+        {
+            new Order("A1", OrderDirection.Buy, 100, 4.99m, new TimeOnly(9, 0, 0)),
+            new Order("S1", OrderDirection.Sell, 100, 5.00m, new TimeOnly(10, 0, 0))
+        };
+
+        // Act
+        var orderBook = algorithm.Match(orders);
+
+        // Assert
+        orderBook.Should().HaveCount(2);
+
+        var a1 = orderBook[0];
+        a1.OrderId.Should().Be("A1");
+        a1.MatchState.Should().Be(MatchState.NoMatch);
+        a1.Matches.Should().BeEmpty();
+
+        var s1 = orderBook[1];
+        s1.OrderId.Should().Be("S1");
+        s1.MatchState.Should().Be(MatchState.NoMatch);
+        s1.Matches.Should().BeEmpty();
+    }
 }
