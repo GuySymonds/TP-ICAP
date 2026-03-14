@@ -72,8 +72,6 @@ Key choices:
 * one `Core` project for business logic
 * one `Console` project for demonstration
 * one `Tests` project for automated tests
-* simple in-house `Result` / `Result<T>` flow
-* no third-party result library
 * warnings treated as errors across the solution
 * simple abstractions only where behaviour genuinely varies
 

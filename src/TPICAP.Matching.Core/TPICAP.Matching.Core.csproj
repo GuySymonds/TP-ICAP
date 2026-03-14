@@ -2,4 +2,7 @@
   <PropertyGroup>
     <RootNamespace>TPICAP.Matching.Core</RootNamespace>
   </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="Results\" />
+  </ItemGroup>
 </Project>
