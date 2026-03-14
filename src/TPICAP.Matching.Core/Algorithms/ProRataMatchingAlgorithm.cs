@@ -8,12 +8,17 @@ public sealed class ProRataMatchingAlgorithm : IMatchingAlgorithm
 {
     public IReadOnlyList<MatchedOrder> Match(IReadOnlyList<Order> orders)
     {
-        var remainingVolumes = orders.ToDictionary(order => order.OrderId, order => order.Volume, StringComparer.Ordinal);
+        MatchingAlgorithmSupport.ValidateInput(orders);
+
+        var invalidOrderIds = MatchingAlgorithmSupport.GetInvalidOrderIds(orders);
+        var validOrders = orders.Where(order => !invalidOrderIds.Contains(order.OrderId)).ToArray();
+
+        var remainingVolumes = validOrders.ToDictionary(order => order.OrderId, order => order.Volume, StringComparer.Ordinal);
         var matches = orders.ToDictionary(order => order.OrderId, _ => new List<MatchEntry>(), StringComparer.Ordinal);
 
-        foreach (var sellOrder in orders.Where(order => order.Direction == OrderDirection.Sell))
+        foreach (var sellOrder in validOrders.Where(order => order.Direction == OrderDirection.Sell))
         {
-            var eligibleBuyOrders = orders
+            var eligibleBuyOrders = validOrders
                 .Where(order => order.Direction == OrderDirection.Buy && order.Price == sellOrder.Price)
                 .ToArray();
 
@@ -61,6 +66,6 @@ public sealed class ProRataMatchingAlgorithm : IMatchingAlgorithm
             remainingVolumes[sellOrder.OrderId] = remainingSellVolume;
         }
 
-        return MatchingAlgorithmSupport.BuildMatchedOrders(orders, matches);
+        return MatchingAlgorithmSupport.BuildMatchedOrders(orders, matches, invalidOrderIds);
     }
 }

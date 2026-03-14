@@ -73,4 +73,48 @@ public class PriceTimePriorityMatchingAlgorithmTests
         s1.MatchState.Should().Be(MatchState.NoMatch);
         s1.Matches.Should().BeEmpty();
     }
+
+    [Fact]
+    public void Match_WhenOrdersIsNull_ThrowsArgumentNullException()
+    {
+        // Arrange
+        var algorithm = new PriceTimePriorityMatchingAlgorithm();
+
+        // Act
+        var act = () => algorithm.Match(null!);
+
+        // Assert
+        act.Should().Throw<ArgumentNullException>();
+    }
+
+    [Fact]
+    public void Match_WhenOrderHasInvalidValues_ReturnsInvalidOrderAndSkipsItFromMatching()
+    {
+        // Arrange
+        var algorithm = new PriceTimePriorityMatchingAlgorithm();
+        var orders = new[]
+        {
+            new Order("A", "A1", OrderDirection.Buy, 100, 5.00m, new TimeOnly(9, 0, 0)),
+            new Order("S", "S1", OrderDirection.Sell, 0, 5.00m, new TimeOnly(10, 0, 0)),
+            new Order("S", "S2", OrderDirection.Sell, 100, 5.00m, new TimeOnly(11, 0, 0))
+        };
+
+        // Act
+        var orderBook = algorithm.Match(orders);
+
+        // Assert
+        var a1 = orderBook[0];
+        a1.MatchState.Should().Be(MatchState.FullMatch);
+        a1.Matches.Should().ContainSingle();
+        a1.Matches[0].OrderId.Should().Be("S2");
+
+        var s1 = orderBook[1];
+        s1.MatchState.Should().Be(MatchState.InvalidOrder);
+        s1.Matches.Should().BeEmpty();
+
+        var s2 = orderBook[2];
+        s2.MatchState.Should().Be(MatchState.FullMatch);
+        s2.Matches.Should().ContainSingle();
+        s2.Matches[0].OrderId.Should().Be("A1");
+    }
 }

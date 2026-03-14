@@ -4,5 +4,6 @@ public enum MatchState
 {
     NoMatch,
     PartialMatch,
-    FullMatch
+    FullMatch,
+    InvalidOrder
 }

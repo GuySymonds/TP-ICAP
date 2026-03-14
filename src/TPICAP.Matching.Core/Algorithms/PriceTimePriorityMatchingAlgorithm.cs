@@ -8,15 +8,20 @@ public sealed class PriceTimePriorityMatchingAlgorithm : IMatchingAlgorithm
 {
     public IReadOnlyList<MatchedOrder> Match(IReadOnlyList<Order> orders)
     {
-        var remainingVolumes = orders.ToDictionary(order => order.OrderId, order => order.Volume, StringComparer.Ordinal);
+        MatchingAlgorithmSupport.ValidateInput(orders);
+
+        var invalidOrderIds = MatchingAlgorithmSupport.GetInvalidOrderIds(orders);
+        var validOrders = orders.Where(order => !invalidOrderIds.Contains(order.OrderId)).ToArray();
+
+        var remainingVolumes = validOrders.ToDictionary(order => order.OrderId, order => order.Volume, StringComparer.Ordinal);
         var matches = orders.ToDictionary(order => order.OrderId, _ => new List<MatchEntry>(), StringComparer.Ordinal);
-        var buyOrders = orders
+        var buyOrders = validOrders
             .Where(order => order.Direction == OrderDirection.Buy)
             .OrderByDescending(order => order.Notional)
             .ThenBy(order => order.Timestamp)
             .ToArray();
 
-        foreach (var sellOrder in orders.Where(order => order.Direction == OrderDirection.Sell))
+        foreach (var sellOrder in validOrders.Where(order => order.Direction == OrderDirection.Sell))
         {
             var remainingSellVolume = remainingVolumes[sellOrder.OrderId];
 
@@ -51,6 +56,6 @@ public sealed class PriceTimePriorityMatchingAlgorithm : IMatchingAlgorithm
             remainingVolumes[sellOrder.OrderId] = remainingSellVolume;
         }
 
-        return MatchingAlgorithmSupport.BuildMatchedOrders(orders, matches);
+        return MatchingAlgorithmSupport.BuildMatchedOrders(orders, matches, invalidOrderIds);
     }
 }
